@@ -1,0 +1,231 @@
+###########################################################################################
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+###########################################################################################
+Lets assume we have issue with the /etcfstab or with grub, or some /etc config file that is not allowing  Os to boot in init level 3.
+
+
+Launch VM Console from exsi-hosts or Vsphere web client or vmware /oracle virtualbox hypervisor.   
+
+
+
+Once we will get a black console screen.
+
+Click on black screen area , if you don't see anything moving for past 5-10 mins. 
+
+Reset	=>	Press Alt+Ctrl+Del if you are using vmware 
+
+Reset	=>	Press Ctrl + R  to reset if you are using Oracle VirtualBox
+
+It 
+First, reboot your server and when you enter the Kernel Selection menu, press e to modify the parameters to boot the kernel.
+
+The next screen will show you a confusing screen of kernel parameters.
+
+
+Scroll down until you find the actual kernel line. It starts with linux16 /vmlinuz-... and will span a couple of lines. 
+You're now looking for the ro keyword in the kernel linux, which would start the OS with a read only (ro) file system.
+
+
+
+Use your arrow keys to go to the ro line and replace it with rw init=/sysroot/bin/bash. 
+
+ro => rw init=/sysroot/bin/bash
+
+
+Then press ctrl+x to boot the kernel with those options.
+
+It will bring you to the shell prompt automatically. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###########################################################################################
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+#																 #
+###########################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Booting from iso image stored on local system or vmware datastore or dvd/cd. 
+ 
+
+power off your vm/instance and select the iso as cd/dvd image and set Bios wait time for bios to 10000 ms. 
+
+
+
+reset the vm
+
+then once we give reset the vm we can press esc/ F12 as per the hypervisor modle. 
+
+for oracle we press F12
+for vmware we press Esc
+
+to select booting device as CD/DVD or HDD or removaable media. 
+
+once selected and verified.  it will ask to select the option to troubleshoot / resuce and  install.
+we will select troubleshoot/resuce to boo the vm into single user mode. 
+your vm will boot into single user mode with the help of iso. 
+
+now once the node is up and using 3 option we have landed into shell. 
+if u had lvm configured , run lvscan to see the lvms and all will be in inactive state. 
+
+#lvcan
+and in inactive state we cannot mount them to access there data. 
+so we have to activate the volume group using below command once the volgroup is ative it will allow us to mount the lvm mount in single user mode. 
+
+now using vgchange -ay we can activate the lvms 
+
+#vgchange -ay
+and using mount we mount various disks.
+
+#mount /dev/VolGroup/lv_root /mnt
+#mkdir a 
+#mount /dev/VolGroup/lv_var ./a
+#df -kh 
+
+once mounted now to access the data stored on these mount point we will need to bring this vm into network. 
+
+#ifconfig 
+
+check which interfaces are present 
+
+assign actual ip to each interface using below command . 
+
+#ip addr add 10.0.2.15 dev enp0s3
+#ip addr add 192.168.77.22 dev enp0s8
+#ip route flush dev enp0s3
+#ip route flush dev enp0s8
+#ip route add 10.0.2.0/24 dev enp0s3
+#ip route add 192.168.77.0/24 dev enp0s8
+#ip route add 0.0.0.0/0 via 10.0.2.2
+#route 
+#ping -c 1 -s 100 192.168.77.21 
+
+
+
+now you can acceess network nodes and if there is any important file to dump from this dead vm to 
+live network that we can do using sftp to ftp or scp command . also we can run ssh command to remote nodes
+
+
+lets say i want to get the ssh connection from external world on this dead vm. 
+
+i will do below changes and make this vm available for network.
+#cd /etc/ssh
+#ls -lrth | grep sshd_config
+#cp -p sshd_config.anaconda sshd_config
+#systemctl restart sshd
+#systemctl status sshd
+
+
+now you can access your vm public or internal ip from the live network of yours 
+
+if there is any issue make sure below containts should be present in /etc/ssh/sshd_config
+
+
+[root@machine1 ~]# ssh root@192.168.77.22
+The authenticity of host '192.168.77.22 (192.168.77.22)' can't be established.
+ECDSA key fingerprint is bc:b1:49:dd:72:e1:46:08:12:0e:c9:6d:25:d3:31:4c.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '192.168.77.22' (ECDSA) to the list of known hosts.
+[anaconda root@localhost ~]# 
+
+
+[anaconda root@localhost ~]# cat /etc/ssh/sshd_config
+Port 22
+PermitRootLogin yes
+IgnoreRhosts yes
+StrictModes yes
+X11Forwarding yes
+X11DisplayOffset 10
+PrintMotd yes
+XAuthLocation /bin/xauth
+KeepAlive yes
+SyslogFacility AUTHPRIV
+RSAAuthentication yes
+PasswordAuthentication yes
+PermitEmptyPasswords yes
+PermitUserEnvironment yes
+[anaconda root@localhost ~]# 
+
+
+
+
