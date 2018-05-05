@@ -21,7 +21,7 @@
 #																 #
 #																 #
 ###########################################################################################
-Lets assume we have issue with the /etcfstab or with grub, or some /etc config file that is not allowing  Os to boot in init level 3.
+Lets assume we have issue with the /etc/fstab or with grub, or some /etc config file that is not allowing  Os to boot in init level 3.
 
 
 Launch VM Console from exsi-hosts or Vsphere web client or vmware /oracle virtualbox hypervisor.   
